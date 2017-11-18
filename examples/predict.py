@@ -119,6 +119,9 @@ for iFrame in range(len(frames)):
 
     img_rgb = caffe.io.load_image(rgb_path)
     img_hha = caffe.io.load_image(hha_path)
+    if frames[iFrame] == target:
+        print rgb_path
+
     img_rgb = img_rgb[45:470,40:600,:]
     img_hha = img_hha[45:470,40:600,:]
 
@@ -178,6 +181,7 @@ del net_integrate
 
 np.save('./score%04d.npy' % img_order, prediction)
 color_image = color_panel[prediction.ravel()].reshape((425,560,3))
+
 
 cv2.imwrite('./example%04d.png' % img_order, color_image)
 
