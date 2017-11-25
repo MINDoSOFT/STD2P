@@ -76,7 +76,7 @@ caffe.set_device(int(gpu_id))
 # select 11 views to predict target frame
 img_order = 1
 nFrames = 11
-max_segments = 550
+max_segments = 550 # If not 550 it crashes at net_integrate.blobs['label_set'].data[...] = label_set
 
 folder = folders[img_order-1]
 
@@ -141,7 +141,7 @@ for iFrame in range(len(frames)):
     post_multiple[iFrame,:,:,:] = upscore[0]
 
     corr_path = data_path + '/%s/%04d/correspondences/%05d.txt' % (folder, img_order, frames[iFrame])
-
+    print(corr_path)
     f = open(corr_path, 'r')
     corr = f.readlines()
     f.close()
@@ -154,11 +154,40 @@ for iFrame in range(len(frames)):
     corr_data[iFrame,:,:,:] = corr
 
     if frames[iFrame] == target:
-        temp1 = np.unique(corr)
-        temp1 = temp1.reshape([temp1.size])
 
+        print('Corr')
+        print(corr.shape)
+
+#        #Keep only the most occuring unique correspondences (to fit max_segments)
+#        from collections import Counter
+#        flatCorr = corr.flatten()
+#        temp1 = [x for _,x in sorted(zip(Counter(flatCorr).values(),Counter(flatCorr).keys()), reverse=True)]
+#        print('Frequent Temp1')
+#        print(temp1)
+#        #temp1 = np.resize(temp1, [max_segments])
+#        temp1 = np.array(temp1[0:max_segments])
+
+        temp1 = np.unique(corr)
+        #print('unique(corr)')
+        #print(temp1)
+        #print(temp1.shape)
+
+        temp1 = temp1.reshape([temp1.size])
+        #temp1 = np.resize(temp1, [max_segments])
+
+        #print('Temp1')
+        #print(temp1.shape)
         number = temp1.size
         temp = -1*np.ones([max_segments])
+
+        #print(corr_path)
+        #print('Temp1')
+        #print(temp1.shape)
+        #print('Temp[0:temp1.size]')
+        #print(temp[0:temp1.size].shape)
+        #print('Temp')
+        #print(temp.shape)
+
         temp[0:temp1.size] = temp1
         label_set = temp
 

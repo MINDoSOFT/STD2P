@@ -14,11 +14,31 @@
 %
 % Copyright by Yang He, Wei-Chen Chiu, Margret Keuper and Mario Fritz, 2017
 
+% Change dir into correct folder
+strSplit = strsplit(pwd, '/');
+if ( strcmp(strSplit(end), 'region_correspondence')~= 1 )
+  cd ../region_correspondence
+end
+
 addpath('./include');
 
 % load('../config/nyud2_split.mat');
 % videoID = trainval; % compute the region correspondence for training set
-videoID = [1];
+if (exist('multipleTargets') == 1)
+  if (exist('currentTarget') == 1)
+    countTargets = multipleTargets;
+    videoID = [currentTarget];
+  else
+    disp('You need to set currentTarget to run this script in multipleTargets mode.');
+    return;
+  end
+else 
+  videoID = [1];
+end
+
+%disp(videoID);
+
+%return;
 
 % input path
 sceneName = 'home_office_0001';
@@ -47,7 +67,12 @@ csp = rand(10000,3)*255;  % color panel
 csp(1,:) = 0;
 
 order = load('../config/my_order.txt');
-order = reshape(order,[2,1])';
+
+if (exist('multipleTargets') == 1)
+  order = reshape(order,[2,countTargets])';
+else
+  order = reshape(order,[2,1])';
+end
 folders = {};
 targets = [];
 fd = fopen('../config/my_folder.txt');
@@ -70,8 +95,8 @@ for i = videoID
     if ~exist(sprintf('%s/%s/%04d', output_path, folder, i))
         mkdir(sprintf('%s/%s/%04d', output_path, folder, i));
     end
-    if ~exist(sprintf('%s/%s/%s/%04d', output_path, folder, output_subdir, i))
-        mkdir(sprintf('%s/%s/%s/%04d', output_path, folder, output_subdir, i));
+    if ~exist(sprintf('%s/%s/%04d/%s', output_path, folder, i, output_subdir))
+        mkdir(sprintf('%s/%s/%04d/%s', output_path, folder, i, output_subdir));
     end
 
     flag = 0;
@@ -103,6 +128,9 @@ for i = videoID
         end
         % corr1 = reshape(tmp,[425,560]);
         corr1 = tmp;
+        % disp('Corr1 size:');
+        % disp(size(corr1));
+
         tmp = getfield(load([superpixel_path sprintf('/%s/%s/%05d.mat',folder,superpixel_subdir,fi+3)], superpixel_var_name), superpixel_var_name);
         tmp = tmp + 1;
         if fast
@@ -116,6 +144,8 @@ for i = videoID
         end
         % corr2 = reshape(tmp,[425,560]);
         corr2 = tmp;
+        % disp('Corr2 size:');
+        % disp(size(corr2));
        
         if fi == target          % init
             corr_target_original = corr1;
@@ -402,7 +432,7 @@ for i = videoID
     for iter1 = order(i,1):3:order(i,2)
         tmp = output1(:,:,kk);
         tmp = tmp(:);
-        outputFilename = sprintf('%s/%s/%s/%04d/%05d.txt',output_path,folder,output_subdir,i,iter1);
+        outputFilename = sprintf('%s/%s/%04d/%s/%05d.txt',output_path,folder,i,output_subdir,iter1);
         disp(outputFilename)
         fp = fopen(outputFilename,'w');
         fprintf(fp,'%g\n',tmp);
