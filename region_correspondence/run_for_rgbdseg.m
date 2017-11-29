@@ -15,12 +15,12 @@
 % Copyright by Yang He, Wei-Chen Chiu, Margret Keuper and Mario Fritz, 2017
 
 % Change dir into correct folder
-strSplit = strsplit(pwd, '/');
+strSplit = strsplit(pwd, filesep);
 if ( strcmp(strSplit(end), 'region_correspondence')~= 1 )
-  cd ../region_correspondence
+  cd(['..' filesep 'region_correspondence'])
 end
 
-addpath('./include');
+addpath(['.' filesep 'include']);
 
 % load('../config/nyud2_split.mat');
 % videoID = trainval; % compute the region correspondence for training set
@@ -42,7 +42,7 @@ end
 
 % input path
 sceneName = 'home_office_0001';
-for_std2p_path = '../../../data/for_std2p';
+for_std2p_path = 'C:\Users\MiNdOs\Documents\MATLAB\Thesis\datasets\outputs\for_std2p';
 img_path = sprintf('%s', for_std2p_path);
 superpixel_path = sprintf('%s', for_std2p_path);
 superpixel_subdir = 'superpixel';
@@ -52,6 +52,11 @@ flow_subdir = 'flow';
 % output path
 output_path = sprintf('%s', for_std2p_path);
 output_subdir = 'correspondences';
+
+imgColorSuffix = '_color.png';
+flowFileSuffix = '.flo';
+superpixelFileSuffix = '.mat';
+correspondenceSuffix = '.txt';
 
 % parameter for computing region correspondence
 interval = 3;        % frame step
@@ -66,7 +71,7 @@ thre_sp = 1000;      % threshold for fast computation, increase this parameter f
 csp = rand(10000,3)*255;  % color panel
 csp(1,:) = 0;
 
-order = load('../config/my_order.txt');
+order = load(['..' filesep 'config' filesep 'my_order.txt']);
 
 if (exist('multipleTargets') == 1)
   order = reshape(order,[2,countTargets])';
@@ -75,12 +80,12 @@ else
 end
 folders = {};
 targets = [];
-fd = fopen('../config/my_folder.txt');
+fd = fopen(['..' filesep 'config' filesep 'my_folder.txt']);
 while ~feof(fd)
     folders = [folders fgetl(fd)];
 end
 fclose(fd);
-fd = fopen('../config/my_target.txt');
+fd = fopen(['..' filesep 'config' filesep 'my_target.txt']);
 while ~feof(fd)
     targets = [targets str2num(fgetl(fd))];
 end
@@ -91,31 +96,35 @@ for i = videoID
 
     target = targets(i);
     folder = folders{i};
+    strVideoID = sprintf('%04d', i);
+    strTarget = sprintf('%05d', target);
     
-    if ~exist(sprintf('%s/%s/%04d', output_path, folder, i))
-        mkdir(sprintf('%s/%s/%04d', output_path, folder, i));
+    if ~exist([output_path filesep folder filesep strVideoID])
+        mkdir([output_path filesep folder filesep strVideoID]);
     end
-    if ~exist(sprintf('%s/%s/%04d/%s', output_path, folder, i, output_subdir))
-        mkdir(sprintf('%s/%s/%04d/%s', output_path, folder, i, output_subdir));
+    
+    if ~exist([output_path filesep folder filesep strVideoID filesep output_subdir])
+        mkdir([output_path filesep folder filesep strVideoID filesep output_subdir]);
     end
 
     flag = 0;
     output1 = [];
     Buf = [];
     
-    img_target = imread(sprintf('%s/%s/%05d_color.png',img_path,folder,target));
+    img_target = imread([img_path filesep folder filesep strTarget imgColorSuffix]);
     
     for fi = target:3:order(i,2)-3
         disp(sprintf('%d : %d',i, fi));
         flag1 = 1;
+        strFi = sprintf('%05d', fi);
         
-        img_current = imread(sprintf('%s/%s/%05d_color.png',img_path,folder,fi));
+        img_current = imread([img_path filesep folder filesep strFi imgColorSuffix]);
         
-        corr = readFlowFile(sprintf('%s/%s/%04d/%s/%05d_%05d.flo',flow_path,folder,i,flow_subdir,fi,fi+3));
+        corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi, fi+3) flowFileSuffix]);
         vx = corr(:,:,1); % STD2P has 46:470 x 41:600
         vy = corr(:,:,2);
-            
-        tmp = getfield(load([superpixel_path sprintf('/%s/%s/%05d.mat',folder,superpixel_subdir,fi)], superpixel_var_name), superpixel_var_name);
+        
+        tmp = getfield(load([superpixel_path filesep folder filesep superpixel_subdir filesep sprintf('%05d', fi) superpixelFileSuffix], superpixel_var_name), superpixel_var_name );
         tmp = tmp + 1;
         if fast && fi ~= target
             unique_tmp = unique(tmp);
@@ -131,7 +140,7 @@ for i = videoID
         % disp('Corr1 size:');
         % disp(size(corr1));
 
-        tmp = getfield(load([superpixel_path sprintf('/%s/%s/%05d.mat',folder,superpixel_subdir,fi+3)], superpixel_var_name), superpixel_var_name);
+        tmp = getfield(load([superpixel_path filesep folder filesep superpixel_subdir filesep sprintf('%05d', fi+3) superpixelFileSuffix], superpixel_var_name), superpixel_var_name );
         tmp = tmp + 1;
         if fast
             unique_tmp = unique(tmp);
@@ -170,7 +179,7 @@ for i = videoID
         tmpBuf = zeros(size(Buf2));
         tmp = corr_flow2;
         for kk = 1:size(Buf2,3)
-            corr = readFlowFile(sprintf('%s/%s/%04d/%s/%05d_%05d.flo',flow_path,folder,i,flow_subdir,fi+6-kk*3,fi+3-kk*3));
+            corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi+6-kk*3, fi+3-kk*3) flowFileSuffix]);
             corrSize = size(corr);
             
             vx = corr(:, :,1);
@@ -272,14 +281,16 @@ for i = videoID
 
     for fi = target:-3:order(i,1)+3
         disp(sprintf('%d : %d',i, fi));
+        strFi = sprintf('%05d', fi);
         
-        img_current = imread(sprintf('%s/%s/%05d_color.png',img_path,folder,fi));
+        img_current = imread([img_path filesep folder filesep strFi imgColorSuffix]);
                
-        corr = readFlowFile(sprintf('%s/%s/%04d/%s/%05d_%05d.flo',flow_path,folder,i,flow_subdir,fi,fi-3));
+        corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi, fi-3) flowFileSuffix]);
+        
         vx = corr(:, :,1);
         vy = corr(:, :,2);
 
-        tmp = getfield(load([superpixel_path sprintf('/%s/%s/%05d.mat',folder,superpixel_subdir,fi)], superpixel_var_name), superpixel_var_name);
+        tmp = getfield(load([superpixel_path filesep folder filesep superpixel_subdir filesep sprintf('%05d', fi) superpixelFileSuffix], superpixel_var_name), superpixel_var_name );
         tmp = tmp + 1;
         if fast && fi ~= target
             unique_tmp = unique(tmp);
@@ -292,7 +303,7 @@ for i = videoID
         end
         % corr1 = reshape(tmp,[corrSize(1),corrSize(2)]);
         corr1 = tmp;
-        tmp = getfield(load([superpixel_path sprintf('/%s/%s/%05d.mat',folder,superpixel_subdir,fi-3)], superpixel_var_name), superpixel_var_name);
+        tmp = getfield(load([superpixel_path filesep folder filesep superpixel_subdir filesep sprintf('%05d', fi-3) superpixelFileSuffix], superpixel_var_name), superpixel_var_name );
         tmp = tmp + 1;
         if fast
             unique_tmp = unique(tmp);
@@ -332,7 +343,7 @@ for i = videoID
         tmpBuf = zeros(size(Buf2));
         tmp = corr_flow2;
         for kk = 1:size(Buf2,3)
-            corr = readFlowFile(sprintf('%s/%s/%04d/%s/%05d_%05d.flo',flow_path,folder,i,flow_subdir,fi-6+kk*3,fi-3+kk*3));
+            corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi-6+kk*3, fi-3+kk*3) flowFileSuffix]);
             vx = corr(:, :,1);
             vy = corr(:, :,2);
             [tmp] = warpImage(tmp,round(-vx),round(-vy));
@@ -430,9 +441,10 @@ for i = videoID
     % saving the region correspondence
     kk = 1;
     for iter1 = order(i,1):3:order(i,2)
+        strIter1 = sprintf('%05d', iter1);
         tmp = output1(:,:,kk);
         tmp = tmp(:);
-        outputFilename = sprintf('%s/%s/%04d/%s/%05d.txt',output_path,folder,i,output_subdir,iter1);
+        outputFilename = [output_path filesep folder filesep strVideoID filesep output_subdir filesep strIter1 correspondenceSuffix];
         disp(outputFilename)
         fp = fopen(outputFilename,'w');
         fprintf(fp,'%g\n',tmp);
