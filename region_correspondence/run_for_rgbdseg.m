@@ -41,8 +41,8 @@ end
 %return;
 
 % input path
-sceneName = 'home_office_0001';
-for_std2p_path = 'C:\Users\MiNdOs\Documents\MATLAB\Thesis\datasets\outputs\for_std2p';
+for_std2p_path = ['..' filesep '..' filesep '..' filesep 'data' filesep 'for_std2p'];
+%for_std2p_path = 'C:\Users\MiNdOs\Documents\MATLAB\Thesis\datasets\outputs\for_std2p';
 img_path = sprintf('%s', for_std2p_path);
 superpixel_path = sprintf('%s', for_std2p_path);
 superpixel_subdir = 'superpixel';
@@ -95,7 +95,7 @@ fclose(fd);
 for i = videoID
 
     target = targets(i);
-    folder = folders{i};
+    folder = folders{i}
     strVideoID = sprintf('%04d', i);
     strTarget = sprintf('%05d', target);
     
@@ -120,7 +120,7 @@ for i = videoID
         
         img_current = imread([img_path filesep folder filesep strFi imgColorSuffix]);
         
-        corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi, fi+3) flowFileSuffix]);
+        corr = readFlowFile([flow_path filesep folder filesep flow_subdir filesep sprintf('%05d_%05d', fi, fi+3) flowFileSuffix]);
         vx = corr(:,:,1); % STD2P has 46:470 x 41:600
         vy = corr(:,:,2);
         
@@ -179,7 +179,7 @@ for i = videoID
         tmpBuf = zeros(size(Buf2));
         tmp = corr_flow2;
         for kk = 1:size(Buf2,3)
-            corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi+6-kk*3, fi+3-kk*3) flowFileSuffix]);
+            corr = readFlowFile([flow_path filesep folder filesep flow_subdir filesep sprintf('%05d_%05d', fi+6-kk*3, fi+3-kk*3) flowFileSuffix]);
             corrSize = size(corr);
             
             vx = corr(:, :,1);
@@ -285,7 +285,7 @@ for i = videoID
         
         img_current = imread([img_path filesep folder filesep strFi imgColorSuffix]);
                
-        corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi, fi-3) flowFileSuffix]);
+        corr = readFlowFile([flow_path filesep folder filesep flow_subdir filesep sprintf('%05d_%05d', fi, fi-3) flowFileSuffix]);
         
         vx = corr(:, :,1);
         vy = corr(:, :,2);
@@ -343,7 +343,7 @@ for i = videoID
         tmpBuf = zeros(size(Buf2));
         tmp = corr_flow2;
         for kk = 1:size(Buf2,3)
-            corr = readFlowFile([flow_path filesep folder filesep strVideoID filesep flow_subdir filesep sprintf('%05d_%05d', fi-6+kk*3, fi-3+kk*3) flowFileSuffix]);
+            corr = readFlowFile([flow_path filesep folder filesep flow_subdir filesep sprintf('%05d_%05d', fi-6+kk*3, fi-3+kk*3) flowFileSuffix]);
             vx = corr(:, :,1);
             vy = corr(:, :,2);
             [tmp] = warpImage(tmp,round(-vx),round(-vy));

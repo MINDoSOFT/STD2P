@@ -36,12 +36,14 @@ parser.add_argument('-f', '--fcn_prototxt', default='./prototxt/fcn_16s_rgbd.pro
 parser.add_argument('-s', '--std2p_prototxt', default='./prototxt/aggregation_std2p.prototxt')
 parser.add_argument('-g', '--gpu_id', default=0)
 parser.add_argument('-m', '--our_model', default='./models/fcn-16s-rgbd-nyud2.caffemodel')
+parser.add_argument('-i', '--img_order', default=1)
 
 args = parser.parse_args()
 gpu_id = args.gpu_id
 fcn_prototxt = args.fcn_prototxt
 std2p_prototxt = args.std2p_prototxt
 our_model = args.our_model
+img_order = int(args.img_order)
 
 f = open('../config/my_target.txt', 'r')
 targets = f.readlines()
@@ -74,7 +76,6 @@ caffe.set_mode_gpu()
 caffe.set_device(int(gpu_id))
 
 # select 11 views to predict target frame
-img_order = 1
 nFrames = 11
 max_segments = 550 # If not 550 it crashes at net_integrate.blobs['label_set'].data[...] = label_set
 
