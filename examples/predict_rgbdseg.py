@@ -15,6 +15,8 @@ import caffe
 import os
 import argparse
 
+import scipy.io as sio
+
 data_path = '../../../data/for_std2p'
 output_path = './output/rgbdseg'
 
@@ -221,4 +223,7 @@ color_image = color_panel[prediction.ravel()].reshape((425,560,3))
 
 resultFilename = '/result%04d.png' % target
 cv2.imwrite(output_path + resultFilename, color_image)
+
+scoreMatFilename = '/score%04d.mat' % target
+sio.savemat(output_path + scoreMatFilename, { 'pixelClasses' : prediction });
 
