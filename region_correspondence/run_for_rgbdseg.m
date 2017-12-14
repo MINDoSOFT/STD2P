@@ -438,6 +438,9 @@ for i = videoID
 
     end
 
+    output_dir = [output_path filesep folder filesep strVideoID filesep output_subdir];
+    exists_or_mkdir(output_dir);
+
     % saving the region correspondence
     kk = 1;
     for iter1 = order(i,1):3:order(i,2)
