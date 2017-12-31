@@ -1,4 +1,5 @@
 import subprocess
+import yaml
 
 # Open the my_multiple_targets.txt
 config_dir = "../config"
@@ -6,7 +7,12 @@ targets_file = "%s/%s" % (config_dir, 'my_multiple_targets.txt')
 target_file = "%s/%s" % (config_dir, 'my_target.txt')
 order_file = "%s/%s" % (config_dir, 'my_order.txt')
 folder_file = "%s/%s" % (config_dir, 'my_folder.txt')
-scene_name = "'home_office_0001'"
+
+# Read the configuration parameters
+with open('../../config_std2p.yaml', 'r') as f:
+   doc = yaml.load(f)
+
+scene_name = doc["sceneName"]
 
 matlab_script = 'run_for_rgbdseg';
 
