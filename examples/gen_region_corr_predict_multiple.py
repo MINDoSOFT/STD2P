@@ -13,6 +13,7 @@ with open('../../config_std2p.yaml', 'r') as f:
    doc = yaml.load(f)
 
 scene_name = doc["sceneName"]
+frameStep = doc["frameStep"]
 
 matlab_script = 'run_for_rgbdseg';
 
@@ -20,7 +21,6 @@ launch_generate_region_correspondence = "matlab -nodesktop -nosplash -r 'cd ../r
 
 launch_std2p = 'python predict_rgbdseg.py -g 0 -m ../STD2P_data/examples/models/fcn-16s-rgbd-nyud2.caffemodel -i %d';
 
-frameStep = 3;
 frameWindow = 50;
 
 testing = False; # If true just messages will be displayed
