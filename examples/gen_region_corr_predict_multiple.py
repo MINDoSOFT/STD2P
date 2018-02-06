@@ -14,6 +14,7 @@ with open('../../config_std2p.yaml', 'r') as f:
 
 scene_name = doc["sceneName"]
 frameStep = doc["frameStep"]
+maxFrames = doc["maxFrames"]
 
 matlab_script = 'run_for_rgbdseg';
 
@@ -24,6 +25,23 @@ launch_std2p = 'python predict_rgbdseg.py -g 0 -m ../STD2P_data/examples/models/
 frameWindow = 50;
 
 testing = False; # If true just messages will be displayed
+
+iTargetFrame = 0;
+upperLimit = maxFrames * frameStep;
+print('upperLimit: %d' % (upperLimit))
+
+# Generate the multiple target file with as many targets as possible
+with open(targets_file, 'w') as multiple_targets:
+   while True:
+      # Added + 1 to iTargetFrame to generate one less target frame
+      upperLimitTargetFrame = (frameWindow * frameStep * 2) + ((iTargetFrame + 1) * frameStep)
+      print('upperLimitTargetFrame: %d' % (upperLimitTargetFrame))
+      if upperLimitTargetFrame <= upperLimit:
+         currentTargetFrame = (iTargetFrame * frameStep) + (frameWindow * frameStep) + 1
+         multiple_targets.write('%d\n' % (currentTargetFrame))
+         iTargetFrame = iTargetFrame + 1
+      else:
+         break
 
 with open(targets_file) as targets: 
    line = targets.readline()
